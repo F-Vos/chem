@@ -1,3 +1,0 @@
-C:/Users/fra/Documents/programming/chem/build/CMakeFiles/chem.dir
-C:/Users/fra/Documents/programming/chem/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/fra/Documents/programming/chem/build/CMakeFiles/ZERO_CHECK.dir
