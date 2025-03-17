@@ -13,8 +13,10 @@ set(GLFW_ROOT "C:/Users/fra/Documents/programming/Libraries/glfw-3.4.bin.WIN64")
 # Add the GLFW include directory
 include_directories(${GLFW_ROOT}/include)
 
-# Create the executable from your source code
-add_executable(${PROJECT_NAME} src/main.cpp)
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+
+# Create the executable from all the source files
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Link with Vulkan and the GLFW library.
 # Adjust the library path based on your Visual Studio version folder (e.g., lib-vc2019 or lib-vc2022)

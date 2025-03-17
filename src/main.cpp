@@ -1,101 +1,36 @@
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include "backend/glfw_backend.h"
+#include "logging/logger.h"
+#include "renderer/renderer.h"
+#include "controller/app.h"
+#include <thread>
+#include <atomic>
 
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
-
-const uint32_t WIDTH = 800;
-const uint32_t HEIGHT = 600;
-
-class HelloTriangleApplication
+void spawn_render_thread(GLFWwindow *window, std::atomic<bool> *done)
 {
-public:
-    void run()
+    chem::Renderer *renderer = new chem::Renderer(window);
+
+    while (!*done)
     {
-        initWindow();
-        initVulkan();
-        mainLoop();
-        cleanup();
+        // Do work repeatedly!
     }
 
-private:
-    GLFWwindow *window;
-
-    VkInstance instance;
-
-    void initWindow()
-    {
-        glfwInit();
-
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-        window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
-    }
-
-    void initVulkan() { createInstance(); }
-
-    void mainLoop()
-    {
-        while (!glfwWindowShouldClose(window))
-        {
-            glfwPollEvents();
-        }
-    }
-
-    void cleanup()
-    {
-        vkDestroyInstance(instance, nullptr);
-
-        glfwDestroyWindow(window);
-
-        glfwTerminate();
-    }
-
-    void createInstance()
-    {
-        VkApplicationInfo appInfo{};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "Hello Triangle";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "No Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_0;
-
-        VkInstanceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pApplicationInfo = &appInfo;
-
-        uint32_t glfwExtensionCount = 0;
-        const char **glfwExtensions;
-        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-        createInfo.enabledExtensionCount = glfwExtensionCount;
-        createInfo.ppEnabledExtensionNames = glfwExtensions;
-
-        createInfo.enabledLayerCount = 0;
-
-        if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create instance!");
-        }
-    }
-};
+    delete renderer;
+}
 
 int main()
 {
-    HelloTriangleApplication app;
+    chem::Logger *logger = chem::Logger::get_logger();
+    logger->set_mode(true);
 
-    try
-    {
-        app.run();
-    }
-    catch (const std::exception &e)
-    {
-        std::cerr << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
+    int width = 800, height = 600;
+    GLFWwindow *window = chem::build_window(width, height, "Chem Engine");
 
-    return EXIT_SUCCESS;
+    std::atomic<bool> done = false;
+    std::thread render_thread(spawn_render_thread, window, &done);
+    chem::App *app = new chem::App(window);
+
+    done = true;
+    render_thread.join();
+    glfwTerminate();
+    return 0;
 }
