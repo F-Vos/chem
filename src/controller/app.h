@@ -30,7 +30,9 @@ namespace chem
          */
         Logger *logger;
     };
+
+    /**
+     * @brief The main program.
+     */
+
 } // namespace chem
-/**
- * @brief The main program.
- */
