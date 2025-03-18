@@ -1,17 +1,22 @@
 #include "renderer.h"
 
-namespace chem
+Engine::Engine(GLFWwindow *window) : window(window)
 {
-    Renderer::Renderer(GLFWwindow *window) : window(window)
+
+    logger = Logger::get_logger();
+    logger->print("Made a graphics engine");
+
+    instance = make_instance("Real Engine", deletionQueue);
+}
+
+Engine::~Engine()
+{
+
+    logger->print("Goodbye see you!");
+
+    while (deletionQueue.size() > 0)
     {
-
-        logger = Logger::get_logger();
-        logger->print("Made a graphics engine");
+        deletionQueue.back()();
+        deletionQueue.pop_back();
     }
-
-    Renderer::~Renderer()
-    {
-
-        logger->print("Goodbye see you!");
-    }
-} // namespace chem
+}

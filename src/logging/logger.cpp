@@ -1,37 +1,63 @@
 #include <iostream>
 #include "logger.h"
-namespace chem
+
+Logger *Logger::logger;
+
+void Logger::set_mode(bool mode)
 {
-    Logger *Logger::logger;
+    enabled = mode;
+}
 
-    void Logger::set_mode(bool mode)
+bool Logger::is_enabled()
+{
+    return enabled;
+}
+
+Logger *Logger::get_logger()
+{
+    if (!logger)
     {
-        enabled = mode;
+        logger = new Logger();
     }
 
-    bool Logger::is_enabled()
+    return logger;
+}
+
+void Logger::print(std::string message)
+{
+
+    if (!enabled)
     {
-        return enabled;
+        return;
     }
 
-    Logger *Logger::get_logger()
-    {
-        if (!logger)
-        {
-            logger = new Logger();
-        }
+    std::cout << message << std::endl;
+}
 
-        return logger;
+void Logger::report_version_number(uint32_t version)
+{
+
+    if (!enabled)
+    {
+        return;
     }
 
-    void Logger::print(std::string message)
+    std::cout << "System can support vulkan Variant: " << vk::apiVersionVariant(version)
+              << ", Major: " << vk::apiVersionMajor(version)
+              << ", Minor: " << vk::apiVersionMinor(version)
+              << ", Patch: " << vk::apiVersionPatch(version) << std::endl;
+}
+
+void Logger::print_list(const char **list, uint32_t count)
+{
+
+    if (!enabled)
     {
-
-        if (!enabled)
-        {
-            return;
-        }
-
-        std::cout << message << std::endl;
+        return;
     }
-} // namespace chem
+
+    for (uint32_t i = 0; i < count; ++i)
+    {
+        std::cout << "\t\"" << list[i] << "\"" << std::endl;
+    }
+}

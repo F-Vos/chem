@@ -7,27 +7,27 @@
 
 void spawn_render_thread(GLFWwindow *window, std::atomic<bool> *done)
 {
-    chem::Renderer *renderer = new chem::Renderer(window);
+    Engine *engine = new Engine(window);
 
     while (!*done)
     {
         // Do work repeatedly!
     }
 
-    delete renderer;
+    delete engine;
 }
 
 int main()
 {
-    chem::Logger *logger = chem::Logger::get_logger();
+    Logger *logger = Logger::get_logger();
     logger->set_mode(true);
 
     int width = 800, height = 600;
-    GLFWwindow *window = chem::build_window(width, height, "Chem Engine");
+    GLFWwindow *window = build_window(width, height, "Chem Engine");
 
     std::atomic<bool> done = false;
     std::thread render_thread(spawn_render_thread, window, &done);
-    chem::App *app = new chem::App(window);
+    App *app = new App(window);
 
     done = true;
     render_thread.join();
