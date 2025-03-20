@@ -56,4 +56,7 @@ private:
      * @brief Vulkan debug messenger
      */
     vk::DebugUtilsMessengerEXT debugMessenger = nullptr;
+
+    // @brief A physical Device
+    vk::PhysicalDevice physicalDevice;
 };

@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "device.h"
 
 Engine::Engine(GLFWwindow *window) : window(window)
 {
@@ -9,6 +10,8 @@ Engine::Engine(GLFWwindow *window) : window(window)
     instance = make_instance("Real Engine", deletionQueue);
     dldi = vk::detail::DispatchLoaderDynamic(instance, vkGetInstanceProcAddr);
     debugMessenger = logger->make_debug_messenger(instance, dldi, deletionQueue);
+
+    physicalDevice = choose_physical_device(instance);
 }
 
 Engine::~Engine()
