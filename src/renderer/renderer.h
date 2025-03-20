@@ -4,14 +4,12 @@
 #include <functional>
 #include "instance.h"
 #include "../logging/logger.h"
-
 /**
  * @brief Vroom vroom.
  *
  */
 class Engine
 {
-
 public:
     /**
      * @brief Construct a new Engine object
@@ -42,10 +40,20 @@ private:
     /**
      * @brief Stores destructors!
      */
-    std::deque<std::function<void()>> deletionQueue;
+    std::deque<std::function<void(vk::Instance)>> deletionQueue;
 
     /**
-     * @brief the main instance
+     * @brief the main Vulkan instance
      */
     vk::Instance instance;
+
+    /**
+     * @brief Dispatch loader for dynamic function loading.
+     */
+    vk::detail::DispatchLoaderDynamic dldi;
+
+    /**
+     * @brief Vulkan debug messenger
+     */
+    vk::DebugUtilsMessengerEXT debugMessenger = nullptr;
 };

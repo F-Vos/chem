@@ -1,8 +1,78 @@
 #include "instance.h"
 #include "../logging/logger.h"
 #include <GLFW/glfw3.h>
+#include <sstream>
+#include <cstdlib>
 
-vk::Instance make_instance(const char *applicationName, std::deque<std::function<void()>> &deletionQueue)
+bool supported_by_instance(const char **extensionNames, int extensionCount, const char **layerNames, int layerCount)
+{
+
+    Logger *logger = Logger::get_logger();
+    std::stringstream lineBuilder;
+
+    // check extension support
+    std::vector<vk::ExtensionProperties> supportedExtensions = vk::enumerateInstanceExtensionProperties().value;
+
+    logger->print("Instance can support the following extensions:");
+    logger->print_extensions(supportedExtensions);
+
+    bool found;
+    for (int i = 0; i < extensionCount; ++i)
+    {
+        const char *extension = extensionNames[i];
+        found = false;
+        for (vk::ExtensionProperties supportedExtension : supportedExtensions)
+        {
+            if (strcmp(extension, supportedExtension.extensionName) == 0)
+            {
+                found = true;
+                lineBuilder << "Extension \"" << extension << "\" is supported!";
+                logger->print(lineBuilder.str());
+                lineBuilder.str("");
+                break;
+            }
+        }
+        if (!found)
+        {
+            lineBuilder << "Extension \"" << extension << "\" is not supported!";
+            logger->print(lineBuilder.str());
+            return false;
+        }
+    }
+
+    // check layer support
+    std::vector<vk::LayerProperties> supportedLayers = vk::enumerateInstanceLayerProperties().value;
+
+    logger->print("Instance can support the following layers:");
+    logger->print_layers(supportedLayers);
+
+    for (int i = 0; i < layerCount; ++i)
+    {
+        const char *layer = layerNames[i];
+        found = false;
+        for (vk::LayerProperties supportedLayer : supportedLayers)
+        {
+            if (strcmp(layer, supportedLayer.layerName) == 0)
+            {
+                found = true;
+                lineBuilder << "Layer \"" << layer << "\" is supported!";
+                logger->print(lineBuilder.str());
+                lineBuilder.str("");
+                break;
+            }
+        }
+        if (!found)
+        {
+            lineBuilder << "Layer \"" << layer << "\" is not supported!";
+            logger->print(lineBuilder.str());
+            return false;
+        }
+    }
+
+    return true;
+}
+
+vk::Instance make_instance(const char *applicationName, std::deque<std::function<void(vk::Instance)>> &deletionQueue)
 {
 
     Logger *logger = Logger::get_logger();
@@ -16,15 +86,6 @@ vk::Instance make_instance(const char *applicationName, std::deque<std::function
     // set the patch to 0 for best compatibility/stability)
     version &= ~(0xFFFU);
 
-    /*
-    * from vulkan_structs.hpp:
-    *
-    * VULKAN_HPP_CONSTEXPR ApplicationInfo( const char * pApplicationName_   = {},
-                                      uint32_t     applicationVersion_ = {},
-                                      const char * pEngineName_        = {},
-                                      uint32_t     engineVersion_      = {},
-                                      uint32_t     apiVersion_         = {} )
-    */
     vk::ApplicationInfo appInfo = vk::ApplicationInfo(
         applicationName,
         version,
@@ -33,15 +94,56 @@ vk::Instance make_instance(const char *applicationName, std::deque<std::function
         version);
 
     /*
-     * Everything with Vulkan is "opt-in", so we need to query which extensions glfw needs
-     * in order to interface with vulkan.
+     * Extensions
      */
     uint32_t glfwExtensionCount = 0;
     const char **glfwExtensions;
     glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+    uint32_t enabledExtensionCount = glfwExtensionCount;
+    if (logger->is_enabled())
+    {
+        enabledExtensionCount++;
+    }
+    const char **ppEnabledExtensionNames = (const char **)malloc(enabledExtensionCount * sizeof(char *));
+
+    for (int i = 0; i < glfwExtensionCount; ++i)
+    {
+        ppEnabledExtensionNames[i] = glfwExtensions[i];
+    }
+    if (logger->is_enabled())
+    {
+        ppEnabledExtensionNames[enabledExtensionCount - 1] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
+    }
 
     logger->print("extensions to be requested:");
-    logger->print_list(glfwExtensions, glfwExtensionCount);
+    logger->print_list(ppEnabledExtensionNames, enabledExtensionCount);
+
+    /*
+     * Layers
+     */
+    uint32_t enabledLayerCount = 0;
+    if (logger->is_enabled())
+    {
+        enabledLayerCount++;
+    }
+    const char **ppEnabledLayerNames = nullptr;
+    if (enabledLayerCount > 0)
+    {
+        ppEnabledLayerNames = (const char **)malloc(enabledLayerCount * sizeof(char *));
+    }
+
+    if (logger->is_enabled())
+    {
+        ppEnabledLayerNames[0] = "VK_LAYER_KHRONOS_validation";
+    }
+
+    logger->print("layers to be requested:");
+    logger->print_list(ppEnabledLayerNames, enabledLayerCount);
+
+    if (!supported_by_instance(ppEnabledExtensionNames, enabledExtensionCount, ppEnabledLayerNames, enabledLayerCount))
+    {
+        return nullptr;
+    }
 
     /*
     *
@@ -57,9 +159,8 @@ vk::Instance make_instance(const char *applicationName, std::deque<std::function
     vk::InstanceCreateInfo createInfo = vk::InstanceCreateInfo(
         vk::InstanceCreateFlags(),
         &appInfo,
-        0, nullptr,                        // enabled layers
-        glfwExtensionCount, glfwExtensions // enabled extensions
-    );
+        enabledLayerCount, ppEnabledLayerNames,
+        enabledExtensionCount, ppEnabledExtensionNames);
 
     vk::ResultValue<vk::Instance> instanceAttempt = vk::createInstance(createInfo);
     if (instanceAttempt.result != vk::Result::eSuccess)
@@ -69,12 +170,16 @@ vk::Instance make_instance(const char *applicationName, std::deque<std::function
     }
 
     vk::Instance instance = instanceAttempt.value;
-    VkInstance handle = instance;
 
-    deletionQueue.push_back([logger, handle]()
+    deletionQueue.push_back([logger](vk::Instance instance)
                             {
-		vkDestroyInstance(handle, nullptr);
+		instance.destroy();
 		logger->print("Deleted Instance!"); });
 
+    free(ppEnabledExtensionNames);
+    if (ppEnabledLayerNames)
+    {
+        free(ppEnabledLayerNames);
+    }
     return instance;
 }
