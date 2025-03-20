@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <deque>
+#include <functional>
 #include <vulkan/vulkan.hpp>
 /**
     Handles messages to print.
@@ -54,6 +56,31 @@ public:
      */
     void print_list(const char **list, uint32_t count);
 
+    /**
+     * @brief Print a list of Vulkan extensions
+     * @param extensions a vector of extensions
+     */
+    void print_extensions(std::vector<vk::ExtensionProperties> &extensions);
+
+    /**
+     * @brief Print a list of Vulkan layers
+     * @param layers a vector of layers
+     */
+    void print_layers(std::vector<vk::LayerProperties> &layers);
+
+    /**
+     * @brief Make a debug messenger
+     *
+     * @param instance The Vulkan instance which will be debugged.
+     * @param dldi dynamically loads instance based dispatch functions
+     * @param deletionQueue stores destructors
+     *
+     * @return the created messenger
+     */
+    vk::DebugUtilsMessengerEXT make_debug_messenger(
+        vk::Instance &instance, vk::detail::DispatchLoaderDynamic &dldi,
+        std::deque<std::function<void(vk::Instance)>> &deletionQueue);
+
 private:
     /**
      * @brief whether the logger is enabled or not.
@@ -61,3 +88,19 @@ private:
      */
     bool enabled;
 };
+
+/**
+ * @brief Logging callback function.
+ *
+ * @param messageSeverity describes the severity level of the message
+ * @param messageType describes the type of the message
+ * @param pCallbackData standard data associated with the message
+ * @param pUserData custom extra data which can be associated with the message
+ *
+ * @return whether to end program execution
+ */
+VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT messageType,
+    const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+    void *pUserData);
