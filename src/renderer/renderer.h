@@ -1,4 +1,6 @@
 #pragma once
+
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <deque>
 #include <functional>
@@ -76,4 +78,10 @@ private:
      *
      */
     vk::Queue graphicsQueue;
+
+    /**
+     * @brief Surface to present to
+     *
+     */
+    vk::SurfaceKHR surface;
 };

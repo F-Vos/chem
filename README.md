@@ -20,3 +20,6 @@ This provides a read-only view of the GPU. We can select a GPU based on preferen
 
 ### Logical device creation
 Since we can't directly manipulate the physical device, we create a logical device abstraction to interact with the GPU.
+
+### Surface
+The surface is letting the Vulkan API know about GLFW.
