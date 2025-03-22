@@ -10,6 +10,7 @@
  */
 class Engine
 {
+
 public:
     /**
      * @brief Construct a new Engine object
@@ -40,23 +41,39 @@ private:
     /**
      * @brief Stores destructors!
      */
-    std::deque<std::function<void(vk::Instance)>> deletionQueue;
+    std::deque<std::function<void(vk::Instance)>> instanceDeletionQueue;
+    std::deque<std::function<void(vk::Device)>> deviceDeletionQueue;
 
     /**
-     * @brief the main Vulkan instance
+     * @brief the main instance
      */
     vk::Instance instance;
 
     /**
-     * @brief Dispatch loader for dynamic function loading.
+     * @brief dynamic instance dispatcher
      */
     vk::detail::DispatchLoaderDynamic dldi;
 
     /**
-     * @brief Vulkan debug messenger
+     * @brief Debug messenger
      */
     vk::DebugUtilsMessengerEXT debugMessenger = nullptr;
 
-    // @brief A physical Device
+    /**
+     * @brief A physical device
+     *
+     */
     vk::PhysicalDevice physicalDevice;
+
+    /**
+     * @brief An abstraction of the physical device
+     *
+     */
+    vk::Device logicalDevice;
+
+    /**
+     * @brief Queues for work submission
+     *
+     */
+    vk::Queue graphicsQueue;
 };

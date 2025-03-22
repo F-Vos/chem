@@ -1,6 +1,8 @@
 #pragma once
 #define VULKAN_HPP_NO_EXCEPTIONS
 #include <vulkan/vulkan.hpp>
+#include <deque>
+#include <functional>
 
 /**
  * @brief Checks whether the physical device can support
@@ -34,3 +36,26 @@ bool is_suitable(const vk::PhysicalDevice &device);
  */
 vk::PhysicalDevice choose_physical_device(
     const vk::Instance &instance);
+
+/**
+ * @brief Query the given physical device for the index of
+ *  a queue family.
+ *
+ * @param physicalDevice Physical device to query.
+ * @param queueType Type of queue being queried.
+ * @return uint32_t the index of the queue family,
+ *  max upon failure.
+ */
+uint32_t findQueueFamilyIndex(vk::PhysicalDevice physicalDevice,
+                              vk::QueueFlags queueType);
+
+/**
+ * @brief Create a logical device object
+ *
+ * @param physicalDevice Physical device to be abstracted
+ * @param deletionQueue holds deletion functions
+ * @return vk::Device An abstraction of the physical device
+ */
+vk::Device create_logical_device(
+    vk::PhysicalDevice physicalDevice,
+    std::deque<std::function<void(vk::Device)>> &deletionQueue);

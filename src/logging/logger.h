@@ -81,7 +81,18 @@ public:
         vk::Instance &instance, vk::detail::DispatchLoaderDynamic &dldi,
         std::deque<std::function<void(vk::Instance)>> &deletionQueue);
 
+    /**
+     * @brief Logs a description of the physical device.
+     *
+     * @param device device to be described.
+     */
     void log(const vk::PhysicalDevice &device);
+
+    /***
+     * @brief Logs a description of the queue families supported
+     * by a device.
+     */
+    void log(const std::vector<vk::QueueFamilyProperties> &queueFamilies);
 
 private:
     /**
