@@ -1,5 +1,7 @@
 #include "swapchain.h"
 #include "../logging/logger.h"
+#include <vulkan/vulkan.h>
+#include <iostream>
 
 void Swapchain::build(
     vk::Device logicalDevice, vk::PhysicalDevice physicalDevice,
@@ -97,6 +99,36 @@ SurfaceDetails Swapchain::query_surface_support(
     return support;
 }
 
+vk::SurfaceFormatKHR Swapchain::choose_surface_format(
+    const std::vector<vk::SurfaceFormatKHR> &availableFormats)
+{
+    for (const auto &availableFormat : availableFormats)
+    {
+        if (availableFormat.format == vk::Format::eB8G8R8A8Unorm &&
+            availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
+        {
+            return availableFormat;
+        }
+    }
+
+    return availableFormats[0];
+}
+
+vk::PresentModeKHR Swapchain::choose_present_mode(
+    const std::vector<vk::PresentModeKHR> &availablePresentModes)
+{
+    for (const auto &availablePresentMode : availablePresentModes)
+    {
+        if (availablePresentMode == vk::PresentModeKHR::eMailbox)
+        {
+            std::cout << "Present mode: Mailbox" << std::endl;
+            return availablePresentMode;
+        }
+    }
+    std::cout << "Using present mode: Fifo" << std::endl;
+    return vk::PresentModeKHR::eFifo;
+}
+
 vk::Extent2D Swapchain::choose_extent(
     uint32_t width, uint32_t height,
     vk::SurfaceCapabilitiesKHR capabilities)
@@ -120,34 +152,4 @@ vk::Extent2D Swapchain::choose_extent(
 
         return extent;
     }
-}
-
-vk::PresentModeKHR Swapchain::choose_present_mode(
-    std::vector<vk::PresentModeKHR> presentModes)
-{
-
-    for (vk::PresentModeKHR presentMode : presentModes)
-    {
-        if (presentMode == vk::PresentModeKHR::eMailbox)
-        {
-            return presentMode;
-        }
-    }
-
-    return vk::PresentModeKHR::eFifo;
-}
-
-vk::SurfaceFormatKHR Swapchain::choose_surface_format(
-    std::vector<vk::SurfaceFormatKHR> formats)
-{
-
-    for (vk::SurfaceFormatKHR format : formats)
-    {
-        if (format.format == vk::Format::eB8G8R8A8Unorm && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
-        {
-            return format;
-        }
-    }
-
-    return formats[0];
 }
