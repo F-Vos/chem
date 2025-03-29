@@ -1,6 +1,8 @@
 #include "device.h"
 #include "../logging/logger.h"
 
+#include <iostream>
+
 bool supports(
     const vk::PhysicalDevice &device,
     const char **ppRequestedExtensions,

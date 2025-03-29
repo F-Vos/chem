@@ -24,6 +24,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "${GLM_ROOT}"
     "${TINYOBJLOADER_ROOT}"
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${Vulkan_INCLUDE_DIRS}"   
 )
 
 # Link libraries

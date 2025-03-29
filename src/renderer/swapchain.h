@@ -107,7 +107,7 @@ private:
      * @return vk::PresentModeKHR the chosen present mode
      */
     vk::PresentModeKHR choose_present_mode(
-        std::vector<vk::PresentModeKHR> presentModes);
+        const std::vector<vk::PresentModeKHR> &availablePresentModes);
 
     /**
      * @brief Choose a surface format
@@ -116,5 +116,5 @@ private:
      * @return vk::SurfaceFormatKHR the chosen format
      */
     vk::SurfaceFormatKHR choose_surface_format(
-        std::vector<vk::SurfaceFormatKHR> formats);
+        const std::vector<vk::SurfaceFormatKHR> &availableFormats);
 };

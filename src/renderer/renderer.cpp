@@ -38,7 +38,9 @@ Engine::Engine(GLFWwindow *window) : window(window)
 
     for (uint32_t i = 0; i < images.size(); ++i)
     {
-        frames.push_back(Frame(images[i]));
+        frames.push_back(
+            Frame(images[i], logicalDevice,
+                  swapchain.format.format, deviceDeletionQueue));
     }
 }
 
