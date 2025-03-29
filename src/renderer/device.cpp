@@ -154,11 +154,16 @@ vk::Device create_logical_device(
         ppEnabledLayers[0] = "VK_LAYER_KHRONOS_validation";
     }
 
+    uint32_t enabledExtensionCount = 1;
+    const char **ppEnabledExtensions = (const char **)malloc(enabledExtensionCount * sizeof(char *));
+    // ppEnabledExtensions[0] = "VK_KHR_portability_subset"; # For MacOS
+    ppEnabledExtensions[0] = "VK_KHR_swapchain";
+
     vk::DeviceCreateInfo deviceInfo = vk::DeviceCreateInfo(
         vk::DeviceCreateFlags(),
         1, &queueInfo,
         enabled_layer_count, ppEnabledLayers,
-        0, nullptr,
+        enabledExtensionCount, ppEnabledExtensions,
         &deviceFeatures);
 
     vk::ResultValueType<vk::Device>::type logicalDevice = physicalDevice.createDevice(deviceInfo);
