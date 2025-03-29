@@ -25,4 +25,4 @@ Since we can't directly manipulate the physical device, we create a logical devi
 The surface is letting the Vulkan API know about GLFW.
 
 ### Swapchain
-A swap chain manages multiple frames that rotate between rendering and presenting to the screen. While the next frame is being rendered, the previous frame is displayed. Common implementations include double-buffering (two frames) or triple-buffering (three frames). A poor implementation can lead to visual artifacts such as screen tearing. There are two present modes possible with Vulkan. FIFO and Mailbox.
+A swap chain manages multiple frames that rotate between rendering and presenting to the screen. While the next frame is being rendered, the previous frame is displayed. Common implementations include double-buffering (two frames) or triple-buffering (three frames). A poor implementation can lead to visual artifacts such as screen tearing. There are a couple of present modes possible with Vulkan like FIFO and Mailbox.
